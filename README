@@ -43,3 +43,19 @@ Memory Usage
 Even though the federated api uses coroutines extensively reading of the JSON from other
 API's is not done in a streaming matter and it will load the entire JSON into memory before
 streaming it back to the client.
+
+Source Indicator Duplication
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In the results like a `_source` object is added to indicate which API the result came from.
+Since this object is added to each result item and it's always the same it adds a lot of
+overhead to the response. This could be improved by adding one `sources` object at the root
+of the response and then adding only a small reference in each result item.
+
+Example::
+
+    {"sources": [ { "name": "..", "url": "..." } ], ...}
+
+    and
+
+    {"results": [ {"_source": "...", ...}], ...}
