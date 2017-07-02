@@ -12,7 +12,7 @@ app = Sanic(__name__)
 app.config.from_object(settings)
 
 
-async def stream_results(name, url, response, stream_state):
+async def stream_results(api_name, url, response, stream_state):
     limit = stream_state['limit']
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
@@ -26,6 +26,10 @@ async def stream_results(name, url, response, stream_state):
                     yield obj
 
             async for obj in iter_objects():
+                obj['_source'] = {
+                    "name": api_name,
+                    "url": url,
+                }
                 stream_state['total'] += 1
                 if stream_state['total'] < stream_state['offset']:
                     continue
@@ -47,11 +51,11 @@ def merge_results(request, api_resource):
         loop = asyncio.get_event_loop()
         urls = []
 
-        for name, endpoint in app.config.OMI_ENDPOINTS.items():
+        for api_name, endpoint in app.config.OMI_ENDPOINTS.items():
             url = urllib.parse.urljoin(endpoint, api_resource)
             # url = f"{url}/;limit={limit};offset={offset}?{query}"
             url = f"{url}/;limit={limit}?{query}"
-            urls.append((name, url))
+            urls.append((api_name, url))
 
         response.write('{"results":[')
         stream_state = {
@@ -60,10 +64,11 @@ def merge_results(request, api_resource):
             'total': 0,
             'count': 0,
         }
-        outcomes = await asyncio.gather(*(stream_results(name, url, response, stream_state) for name, url in urls))
+        outcomes = await asyncio.gather(*(stream_results(api_name, url, response, stream_state) for api_name, url in urls))
         count = stream_state['count']
         total = stream_state['total']
-        response.write('],"count":{},"total":{},"offset":{}'.format(count, total, offset))
+        response.write('],')
+        response.write('"count":{},"total":{},"offset":{}'.format(count, total, offset))
         response.write('}')
 
     return response.stream(streaming_fn, content_type='application/json')
