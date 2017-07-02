@@ -1,0 +1,5 @@
+sanic==0.5.4
+aiohttp==2.2.0
+aiodns==1.1.1
+cchardet==2.1.0
+ipython==6.1.0

@@ -1,5 +1,8 @@
 sawtooth-core/
 omi-summer-lab/
+settings_local.py
+access.log
+error.log
 
 # IDE / Editors
 .idea/

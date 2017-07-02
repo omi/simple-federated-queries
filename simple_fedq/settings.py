@@ -1,0 +1,2 @@
+
+OMI_ENDPOINTS = {}

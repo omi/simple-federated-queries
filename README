@@ -1,0 +1,45 @@
+simple-federated-queries
+========================
+
+Simple proof of concept code for doing federated queries for OMI.
+
+
+Getting Started
+---------------
+
+Create a file called `settings_local.py` and add OMI api's to it, eg::
+
+    OMI_ENDPOINTS = {
+        "sawtooth": "http://localhost:8000/",
+        "musicbrainz": "http://localhost:8888/api/",
+    }
+
+
+Setup
+~~~~~
+
+ $ ./setup_venv.sh
+
+Run
+~~~
+
+ $ source venv3/bin/activate
+ $ python app.py
+
+
+Known Issues
+------------
+
+Sorting and Paging
+~~~~~~~~~~~~~~~~~~
+
+Without sorting in the OMI API Spec there is no easy way to have stable query results.
+At this point we do not try to solve this. Specifying `offset` to queries will not have
+a stable result.
+
+Memory Usage
+~~~~~~~~~~~~
+
+Even though the federated api uses coroutines extensively reading of the JSON from other
+API's is not done in a streaming matter and it will load the entire JSON into memory before
+streaming it back to the client.
